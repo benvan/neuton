@@ -1,0 +1,64 @@
+<html>
+	<head>
+		<script type='text/javascript' src='vector.js' ></script>
+		<script type='text/javascript' src='engine.js' ></script>
+		<script type='text/javascript' src='space.js' ></script>
+	</head>
+	<body>
+		
+		<canvas id='cv' width='500' height='500' style='border:1px solid black;'></canvas>
+		<div id="fps"></div>
+	
+		<script type='text/javascript'>
+			var cv = document.getElementById('cv');
+			console.log(cv);
+			var space = new Space(cv);
+
+			var fix = new Particle(300,100);
+			var loose = new Particle(100,100);
+			
+			for (var i = 0; i < 50; i++){
+				var b = new Particle(100+(i*1), 100);
+				space.particles.push(b)
+				space.joints.push(new Joint(loose, b));
+				loose = b;
+			}
+			
+
+			space.particles.push(loose);
+			space.joints.push(new Joint(fix, loose));
+
+			space.canvas.onmousemove = function(ev){
+				fix.cur.set(new Vector(ev.clientX, ev.clientY));
+			};
+
+			var fps = 0, now, lastUpdate = (new Date)*1 - 1;
+
+			// The higher this value, the less the FPS will be affected by quick changes
+			// Setting this to 1 will show you the FPS of the last sampled frame only
+			var fpsFilter = 50;
+
+			var drawFrame = function(){
+				space.run();
+				space.draw();
+
+			  var thisFrameFPS = 1000 / ((now=new Date) - lastUpdate);
+			  fps += (thisFrameFPS - fps) / fpsFilter;
+			  lastUpdate = now * 1 - 1;
+
+			  setTimeout( drawFrame, 1 );
+			}
+			
+			drawFrame();
+
+			var fpsOut = document.getElementById('fps');
+			setInterval(function(){
+			  fpsOut.innerHTML = fps.toFixed(1) + "fps";
+			}, 1000); 
+		</script>
+	
+	</body>
+</html>
+
+
+		
