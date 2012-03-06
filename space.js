@@ -2,7 +2,7 @@ var Space = function(canvas){
 	this.timestep = 1/25;
 	this.particles = [];
 	this.joints = [];
-	this.gravity = new Vector(0,1);
+	this.gravity = new Vector(0,0.2);
 	this.canvas = canvas;
 	this.ctx = canvas.getContext('2d');
 };
@@ -10,7 +10,7 @@ var Space = function(canvas){
 Space.prototype = {
 	run: function(){
 	
-		var steps = 5;
+		var steps = 2;
 		var dt = 1/steps;
 		for (var k = 0; k < 1; k++){
 			for (var i = 0; i < this.particles.length; i++){
@@ -21,13 +21,27 @@ Space.prototype = {
 				this.joints[i].relax();
 			}
 			
-			for (var i = 0; i < this.joints.length; i++){
+			for (var i = 0; i < this.particles.length; i++){
 				this.particles[i].accelerate(dt);
 				this.particles[i].inertia(dt);
 			}
 		}
 	
 
+	},
+	
+	add: function(item){
+		for (var i = 0; i < item.particles.length; i++){
+			this.particles.push(item.particles[i]);
+		}
+		for (var i = 0; i < item.joints.length; i++){
+			this.joints.push(item.joints[i]);
+		}
+	},
+	
+	fix: function(particle){
+		var i = this.particles.indexOf(particle);
+		this.particles.remove(i,i);
 	},
 	
 	draw: function(){
@@ -37,19 +51,13 @@ Space.prototype = {
 			
 			for (var i = 0; i < this.joints.length; i++){
 				var j = this.joints[i];
-				ctx.beginPath();
-				ctx.moveTo(j.a.cur.x, j.a.cur.y);
-				ctx.lineTo(j.b.cur.x, j.b.cur.y);
-				ctx.stroke();
+				j.draw(ctx);
 			}
 			
-			continue;
+
 			for (var i = 0; i < this.particles.length; i++){
 				var p = this.particles[i];
-
-				ctx.beginPath();
-				ctx.arc(p.cur.x, p.cur.y, 1, 0, Math.PI*2, false);
-				ctx.fill();
+				p.draw(ctx);
 			}
 			
 		}
